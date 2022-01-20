@@ -1,6 +1,16 @@
 # Developer Test
 
-This application is an API for an ad quality management team to sort ads based on a number of specific features.
+This application is an API for an ad quality management team for sort ads based on a number of specific features.
+
+Once you have installed the dependencies and the docker container is running, there are 3 available endpoints:
+- Endpoint for data creation: http://localhost/. Also, the data can be created using the command app:create-data
+- Endpoint for score calculation: http://localhost/calculate/score. Also, the score can be updated using the command app:update-score
+- Endpoint for quality department: http://localhost/calculate/quality/deparment
+- Endpoint for user: http://localhost/calculate/public/ad
+
+# About The Architecture
+
+My first approach was to develop this application using DDD and CQRS, but I thought that it could add cognitive complexity to a simple domain. Therefore, I decided to use the default Symfony architecture.
 
 ## Instructions
 - Install Docker https://www.docker.com/get-started
