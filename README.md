@@ -1,6 +1,6 @@
 # Developer Test
 
-This application is an API for an ad quality management team for sort ads based on specific features.
+This application is an API which provides a tool for ads quality scoring based on specific features to quality management team.
 
 Once you have installed the dependencies and the docker container is running, there are 3 available endpoints:
 - Endpoint for data creation: http://localhost/. Also, the data can be created using the command app:create-data
