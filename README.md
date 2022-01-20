@@ -1,12 +1,9 @@
-# Symfony Base Repository
+# Developer Test
 
-This repository contains the basic configuration to run Symfony applications with MySQL database
-
-## Content
-- PHP container running version 8.1.1
-- MySQL container running version 8.0.26
+This application is an API for an ad quality management team to sort ads based on a number of specific features.
 
 ## Instructions
+- Install Docker https://www.docker.com/get-started
 - `make build` to build the containers
 - `make start` to start the containers
 - `make stop` to stop the containers
