@@ -6,28 +6,26 @@ use App\Entity\Ad;
 
 class AdQualityCalculator
 {
+    /** Features */
     const SHORT_DESCRIPTION_LOW_THRESHOLD  = 20;
     const SHORT_DESCRIPTION_HIGH_THRESHOLD = 49;
-    const SHORT_DESCRIPTION_SCORE          = 10;
-
     const LONG_DESCRIPTION_THRESHOLD       = 50;
-    const LONG_DESCRIPTION_SCORE           = 30;
 
-    const KEYWORDS                         = ['Luminoso', 'Nuevo', 'Centrico', 'Reformado', 'Atico'];
-    const KEYWORD_OCCURRENCE_SCORE         = 5;
-
+    const KEYWORDS                         = ['luminoso', 'nuevo', 'centrico', 'reformado', 'atico'];
     const HD_IMAGE                         = 'HD';
-
-    const HD_IMAGE_SCORE                   = 20;
-    const SD_IMAGE_SCORE                   = 10;
-
-    const NO_IMAGES_SCORE                  = -10;
-
-    const COMPLETE_AD_SCORE                = 40;
-
     const FLAT_TYPOLOGY                    = 'Piso';
     const CHALET_TYPOLOGY                  = 'Chalet';
     const GARAGE_TYPOLOGY                  = 'Garaje';
+
+    /** Score by feature */
+    const AD_WITH_DESCRIPTION_SCORE        = 5;
+    const HD_IMAGE_SCORE                   = 20;
+    const SD_IMAGE_SCORE                   = 10;
+    const KEYWORD_OCCURRENCE_SCORE         = 5;
+    const SHORT_DESCRIPTION_SCORE          = 10;
+    const LONG_DESCRIPTION_SCORE           = 30;
+    const NO_IMAGES_SCORE                  = -10;
+    const COMPLETE_AD_SCORE                = 40;
 
     public function __construct()
     {
@@ -35,12 +33,14 @@ class AdQualityCalculator
 
     public function __invoke(Ad $ad): int
     {
-        return ($this->score($ad) <= 0) ? 0 : $this->score($ad);
+        return $this->score($ad);
     }
 
     public function score($ad): int
     {
-        return $this->evaluatePicturesQuality($ad) + $this->evaluateDescriptionQuality($ad) + $this->evaluateCompletenessByTypology($ad);
+        $scoreResult = $this->evaluatePicturesQuality($ad) + $this->evaluateDescriptionQuality($ad) + $this->evaluateCompletenessByTypology($ad);
+
+        return ($scoreResult <= 0) ? 0 : $scoreResult;
     }
 
     public function evaluatePicturesQuality($ad): int
@@ -65,30 +65,35 @@ class AdQualityCalculator
         }
 
         $score = 0;
-        if ($ad->getTipology() === self::FLAT_TYPOLOGY && strlen($ad->getDescription()) >= self::SHORT_DESCRIPTION_LOW_THRESHOLD && strlen($ad->getDescription()) <= self::SHORT_DESCRIPTION_HIGH_THRESHOLD){
+        if ($ad->getTipology() === self::FLAT_TYPOLOGY && (count($this->eachWordFromDescription($ad)) >= self::SHORT_DESCRIPTION_LOW_THRESHOLD && count($this->eachWordFromDescription($ad)) <= self::SHORT_DESCRIPTION_HIGH_THRESHOLD)){
             $score += self::SHORT_DESCRIPTION_SCORE;
         }
 
-        if ($ad->getTipology() === self::CHALET_TYPOLOGY && strlen($ad->getDescription()) >= self::LONG_DESCRIPTION_THRESHOLD) {
+        if ($ad->getTipology() === self::CHALET_TYPOLOGY && count($this->eachWordFromDescription($ad)) >= self::LONG_DESCRIPTION_THRESHOLD) {
             $score += self::LONG_DESCRIPTION_SCORE;
         }
 
-        return $score + $this->findKeywords($ad);
+        return $score + self::AD_WITH_DESCRIPTION_SCORE + $this->findKeywords($ad);
     }
 
     public function findKeywords($ad): int
     {
-        $eachDescriptionWord = explode(' ', $ad->getDescription());
+        $eachDescriptionWord = $this->eachWordFromDescription($ad);
 
         $score = 0;
         foreach ($eachDescriptionWord as $word)
         {
-            if (in_array($word, self::KEYWORDS)) {
+            if (in_array(strtolower($word), self::KEYWORDS)) {
                 $score += self::KEYWORD_OCCURRENCE_SCORE;
             }
         }
 
         return $score;
+    }
+
+    public function eachWordFromDescription($ad): array
+    {
+        return explode(' ', $ad->getDescription());
     }
 
     public function evaluateCompletenessByTypology($ad): int
